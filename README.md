@@ -23,5 +23,13 @@ wordle
 
 ## Wordle solver
 
-The module contains a `WordleSolver` class that can be used to solve a Wordle.
-See the tests for more details.
+Use the solver with
+
+~~~console
+wordle-solve
+~~~
+
+You will be asked for your initial guess and for the outcome. Use 0 for a gray
+tile, 1 for a yellow one and 2 for a green one. You will be suggested the next
+word to try. Use it and then report the outcome. Hopefully you will get the word
+you are looking for in less than 6 moves 🙂.

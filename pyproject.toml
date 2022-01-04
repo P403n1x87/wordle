@@ -3,7 +3,7 @@ authors = ["Gabriele N. Tornetta <phoenix1987@gmail.com>"]
 description = ""
 license = "GPL3+"
 name = "wordle"
-version = "0.1.0"
+version = "0.2.0"
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -17,3 +17,4 @@ requires = ["poetry-core>=1.0.0"]
 
 [tool.poetry.scripts]
 wordle = 'wordle:run'
+wordle-solve = "wordle:solve"

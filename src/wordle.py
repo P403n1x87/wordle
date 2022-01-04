@@ -36,7 +36,6 @@ class WordleSolver:
     def __init__(self, words: _t.List[str]) -> None:
         self.words = words
 
-        self.exclude: _t.Set[str] = set()
         self.correct: _t.Dict[int, str] = {}
         self.misplaced: _t.Dict[int, _t.Set[str]] = defaultdict(set)
         self.include: _t.Set[str] = set()
@@ -45,37 +44,30 @@ class WordleSolver:
         return choice(self.words)
 
     def shrink(self, word: str, tiles: _t.List[TileColor]) -> None:
+        exclude: _t.Set[str] = set()
         for i, (c, t) in enumerate(zip(word, tiles)):
             if t is TileColor.GRAY:
-                self.exclude.add(c)
+                exclude.add(c)
             elif t is TileColor.GREEN:
                 self.correct[i] = c
             else:
                 self.misplaced[i].add(c)
                 self.include.add(c)
 
-        feasible = [
-            (
-                len(
-                    {c for i, c in enumerate(word) if i not in self.correct}
-                    & self.include
-                ),
-                word,
-            )
+        self.words = [
+            word
             for word in self.words
             if not (
-                self.exclude & set(word)
+                exclude & set(word)
                 or not all(word[i] == c for i, c in self.correct.items())
                 or any(
                     word[i] in self.misplaced[i]
                     for i in range(len(word))
                     if i not in self.correct
                 )
+                or not (self.include < set(word))
             )
         ]
-
-        hi = max(s for s, _ in feasible)
-        self.words = [w for s, w in feasible if s == hi]
 
 
 def unix_words():
@@ -89,30 +81,58 @@ def unix_words():
 def run():
     print("W O R D L E\n")
     words = {_ for _ in unix_words() if len(_) == 5}
-    word = words.pop()
-    words.add(word)
-    w = Wordle(word, unix_words())
+    w = Wordle(next(iter(words)), words)
 
     C = {TileColor.GREEN: 32, TileColor.YELLOW: 33, TileColor.GRAY: "38;5;244"}
     for i in range(6):
         while True:
-            guess = input(".....\r").strip().lower()
+            try:
+                guess = input(".....\r").strip().lower()
+            except KeyboardInterrupt:
+                print("\n👋 Bye!")
+                return
             if guess in words:
                 break
             print("\033[A", end="")
 
         outcome = w.submit(guess)
+        print("\033[A", end="")
         print(
-            "\033[A"
-            + "".join(
-                [f"\033[{C[t]}m{c.upper()}\033[0m" for c, t in zip(guess, outcome)]
-            )
+            "".join([f"\033[{C[t]}m{c.upper()}\033[0m" for c, t in zip(guess, outcome)])
         )
         if set(outcome) == {TileColor.GREEN}:
             print("✨ 🍰 ✨")
-            break
-    else:
-        print("💀 GAME OVER 💀")
+            return
+    print("💀 GAME OVER 💀")
+
+
+def solve():
+    print("W O R D L E   S O L V E R\n")
+
+    print(
+        "Use \033[38;5;244;1m0\033[0m for \033[38;5;244mgray\033[0m,"
+        " \033[33;1m1\033[0m for \033[33;1myellow\033[0m "
+        "and \033[32;1m2\033[0m for \033[32;1mgreen\033[0m\n"
+    )
+
+    ws = WordleSolver([_ for _ in unix_words() if len(_) == 5])
+
+    try:
+        guess = input("Your guess: ").strip().lower()
+        if not guess:
+            return
+        for _ in range(6):
+            outcome = input("The outcome: ").strip()
+            if not outcome:
+                return
+            ws.shrink(guess, [TileColor(int(_)) for _ in outcome])
+            guess = ws.guess()
+            print(f"Try '{guess.upper()}'")
+            print("\033[A\033[A" + " " * 32, end="\r")
+    except KeyboardInterrupt:
+        print()
+    finally:
+        print("\n👋 Bye!")
 
 
 if __name__ == "__main__":
