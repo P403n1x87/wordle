@@ -14,10 +14,6 @@ pipx install git+https://github.com/p403n1x87/wordle.git
 wordle
 ~~~
 
-> NOTE: This requires the file `/usr/share/dict/words/` to be present on your
-> system to work. Most Linux systems have this file. If you want to play on
-> Windows you can try installing via WSL.
-
 <p align="center"><img src="art/wordle.gif"/></p>
 
 
@@ -32,4 +28,5 @@ wordle-solve
 You will be asked for your initial guess and for the outcome. Use 0 for a gray
 tile, 1 for a yellow one and 2 for a green one. You will be suggested the next
 word to try. Use it and then report the outcome. Hopefully you will get the word
-you are looking for in less than 6 moves 🙂.
+you are looking for in less than 6 moves 🙂. Tests show that the solution is
+correctly guessed in over 95% of the cases.

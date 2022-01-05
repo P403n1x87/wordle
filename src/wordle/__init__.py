@@ -3,6 +3,8 @@ from collections import defaultdict
 from enum import Enum
 from random import choice
 
+from wordle.words import WORDS
+
 
 class TileColor(Enum):
     GRAY = 0
@@ -41,15 +43,19 @@ class WordleSolver:
         self.include: _t.Set[str] = set()
 
     def guess(self) -> str:
-        return choice(self.words)
+        # TODO: Use entropy or other heuristics to make better guesses
+        scored = [(len(set(_)), _) for _ in self.words]
+        m = max(s for s, _ in scored)
+        return choice([w for s, w in scored if s == m])
 
     def shrink(self, word: str, tiles: _t.List[TileColor]) -> None:
         exclude: _t.Set[str] = set()
         for i, (c, t) in enumerate(zip(word, tiles)):
-            if t is TileColor.GRAY:
+            if t is TileColor.GRAY and c not in self.include:
                 exclude.add(c)
             elif t is TileColor.GREEN:
                 self.correct[i] = c
+                self.include.add(c)
             else:
                 self.misplaced[i].add(c)
                 self.include.add(c)
@@ -65,7 +71,7 @@ class WordleSolver:
                     for i in range(len(word))
                     if i not in self.correct
                 )
-                or not (self.include < set(word))
+                or not (self.include <= set(word))
             )
         ]
 
@@ -80,8 +86,8 @@ def unix_words():
 
 def run():
     print("W O R D L E\n")
-    words = {_ for _ in unix_words() if len(_) == 5}
-    w = Wordle(next(iter(words)), words)
+
+    w = Wordle(next(iter(WORDS)), WORDS)
 
     C = {TileColor.GREEN: 32, TileColor.YELLOW: 33, TileColor.GRAY: "38;5;244"}
     for i in range(6):
@@ -91,7 +97,7 @@ def run():
             except KeyboardInterrupt:
                 print("\n👋 Bye!")
                 return
-            if guess in words:
+            if guess in WORDS:
                 break
             print("\033[A", end="")
 
@@ -115,7 +121,7 @@ def solve():
         "and \033[32;1m2\033[0m for \033[32;1mgreen\033[0m\n"
     )
 
-    ws = WordleSolver([_ for _ in unix_words() if len(_) == 5])
+    ws = WordleSolver(list(WORDS))
 
     try:
         guess = input("Your guess: ").strip().lower()

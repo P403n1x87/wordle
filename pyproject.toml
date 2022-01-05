@@ -3,7 +3,7 @@ authors = ["Gabriele N. Tornetta <phoenix1987@gmail.com>"]
 description = ""
 license = "GPL3+"
 name = "wordle"
-version = "0.2.0"
+version = "0.3.0"
 
 [tool.poetry.dependencies]
 python = "^3.7"
