@@ -1,5 +1,5 @@
 import typing as _t
-from collections import defaultdict
+from collections import Counter, defaultdict
 from enum import Enum
 from random import choice
 
@@ -43,10 +43,20 @@ class WordleSolver:
         self.include: _t.Set[str] = set()
 
     def guess(self) -> str:
-        # TODO: Use entropy or other heuristics to make better guesses
-        scored = [(len(set(_)), _) for _ in self.words]
-        m = max(s for s, _ in scored)
-        return choice([w for s, w in scored if s == m])
+        count = Counter()
+        for word in self.words:
+            count.update(set(word))
+        for c in self.include:
+            count[c] = 0
+
+        # We score words based on the basis of the number of unique letters that
+        # form it and the frequency by which each letter that is not in the
+        # solution appears in the remaining set of words (counted once per
+        # appearance in each word). This should allow us to remove words more
+        # quickly to get to the solution in fewer moves.
+        scored = [(len(set(_)), sum(count[c] for c in set(_)), _) for _ in self.words]
+        m = max(s for *s, _ in scored)
+        return choice([w for *s, w in scored if s == m])
 
     def shrink(self, word: str, tiles: _t.List[TileColor]) -> None:
         exclude: _t.Set[str] = set()

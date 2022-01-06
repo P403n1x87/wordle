@@ -31,5 +31,6 @@ def test_solver(wordle):
         assert guess == wordle.secret, "guess is correct"
 
         success += a < 6
+    runs += 1
 
-    assert success / runs > 0.95
+    assert success / runs > 0.999
