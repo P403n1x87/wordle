@@ -21,11 +21,12 @@ class Wordle:
         assert len(word) == len(self.secret), "word has same length as secret"
         assert word in self.words, "word is in the dictionary"
 
-        ss = set(self.secret)
+        ss = list(self.secret)
         hints = []
         for a, b in zip(word.lower(), self.secret):
             if a == b:
                 hints.append(TileColor.GREEN)
+                ss.remove(a)
             elif a in ss:
                 hints.append(TileColor.YELLOW)
                 ss.remove(a)
